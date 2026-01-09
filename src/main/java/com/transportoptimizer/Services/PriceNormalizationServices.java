@@ -56,7 +56,7 @@ public class PriceNormalizationServices{
         return normalized;
     }
 
-    private double roundTo2(double value) {
-        return Math.round(value * 100.0) / 100.0;
+    private int roundTo2(double value) {
+        return (int)value ;
     }
 }
