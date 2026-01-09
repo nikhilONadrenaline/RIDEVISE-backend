@@ -105,15 +105,15 @@ public class DistanceMatrixService {
 
         String key = (origin + "->" + destination).toLowerCase();
 
-        if (key.contains("delhi") && key.contains("noida")) return 27.5;
-        if (key.contains("delhi") && key.contains("rajiv chowk")) return 3.0;
-        if (key.contains("mumbai") && key.contains("thane")) return 32.0;
-        if (key.contains("bangalore") && key.contains("hyderabad")) return 575.0;
-        if (key.contains("delhi") && key.contains("karol bagh")) return 8.7;
-        if (key.contains("noida") && key.contains("hyderabad")) return 1686.0;
-        if (key.contains("pune") && key.contains("bangalore")) return 845.0;
-        if (key.contains("pune") && key.contains("mumbai")) return 156.0;
-        if (key.contains("mumbai") && key.contains("hyderabad")) return 742.0;
+        if (key.contains("mnnit") && key.contains("naini station")) return 10.0;
+        if (key.contains("mnnit") && key.contains("sangam ghat")) return 7.2;
+        if (key.contains("mnnit") && key.contains("prayagraj cheoki station")) return 12.0;
+        if (key.contains("mnnit") && key.contains("civil lines")) return 5.4;
+        if (key.contains("mnnit") && key.contains("allahabad university")) return 3.0;
+        if (key.contains("mnnit") && key.contains("prayagraj junction")) return 6.8;
+        if (key.contains("new delhi") && key.contains("rajiv chowk")) return 3.0;
+//        if (key.contains("pune") && key.contains("mumbai")) return 156.0;
+//        if (key.contains("mumbai") && key.contains("hyderabad")) return 742.0;
 
         // generic deterministic fallback
         return 5 + Math.abs(origin.hashCode() - destination.hashCode()) % 20;
