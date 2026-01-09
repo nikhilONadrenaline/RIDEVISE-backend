@@ -5,6 +5,7 @@ import com.transportoptimizer.provider.ProviderClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
@@ -12,18 +13,27 @@ import java.util.*;
 public class UberMockClient implements ProviderClient {
 
     private static final Map<String, Double> BASE_FARE = Map.of(
-            "cab", 50.0,
-            "premium_cab", 80.0,
-            "auto", 30.0,
-            "bike", 20.0
+            "cab", 56.0,
+            "premium_cab", 70.0,
+            "auto", 40.0,
+            "bike", 22.0
     );
 
     private static final Map<String, Double> RATE_PER_KM = Map.of(
-            "cab", 12.0,
-            "premium_cab", 18.0,
-            "auto", 8.0,
-            "bike", 6.0
+            "cab", 25.0,
+            "premium_cab", 30.0,
+            "auto", 15.2,
+            "bike", 8.0
     );
+
+    private static final Map<String, Double> SHORT_TRIP_BASE_FARE = Map.of(
+            "bike", 10.0,
+            "auto", 35.0,
+            "cab", 45.0,
+            "premium_cab", 70.0
+    );
+
+    private static final double SHORT_TRIP_DISTANCE_KM = 4.0;
 
     @Override
     public String providerId() {
@@ -57,6 +67,16 @@ public class UberMockClient implements ProviderClient {
         );
     }
 
+    private double resolveBaseFare(String vehicleType, double distanceKm) {
+        if (distanceKm <= SHORT_TRIP_DISTANCE_KM) {
+            return SHORT_TRIP_BASE_FARE.getOrDefault(
+                    vehicleType,
+                    BASE_FARE.getOrDefault(vehicleType, 0.0)
+            );
+        }
+        return BASE_FARE.getOrDefault(vehicleType, 0.0);
+    }
+
     private ProviderFare buildFare(
             String name,
             String vehicleType,
@@ -65,7 +85,7 @@ public class UberMockClient implements ProviderClient {
             int maxEta,
             Map<String, Object> options
     ) {
-        double baseFare = BASE_FARE.getOrDefault(vehicleType, 0.0);
+        double baseFare = resolveBaseFare(vehicleType, distance);
         double ratePerKm = RATE_PER_KM.getOrDefault(vehicleType, 0.0);
         double distanceFare = distance * ratePerKm;
 
@@ -99,13 +119,15 @@ public class UberMockClient implements ProviderClient {
             String vehicleType,
             Map<String, Object> options
     ) {
-        // No time provided → controlled randomness
-        if (options == null || !options.containsKey("departureTime")) {
-            return random(0.95, 1.15);
-        }
+//        // No time provided → controlled randomness
+//        if (options == null || !options.containsKey("departureTime")) {
+//            return random(0.95, 1.15);
+//        }
 
         try {
-            String timeStr = options.get("departureTime").toString();
+            LocalDateTime departureTime =LocalDateTime.now();
+
+            String timeStr = departureTime.toString();
             int hour = Integer.parseInt(timeStr.substring(11, 13)); // yyyy-MM-ddTHH:mm
 
             boolean morningPeak = hour >= 8 && hour <= 11;
@@ -116,15 +138,15 @@ public class UberMockClient implements ProviderClient {
 
             if (morningPeak || eveningPeak) {
                 baseSurge = switch (vehicleType) {
-                    case "bike" -> 1.10;
-                    case "auto" -> 1.20;
-                    case "cab" -> 1.30;
-                    case "premium_cab" -> 1.45;
+                    case "bike" -> 1.08;
+                    case "auto" -> 1.15;
+                    case "cab" -> 1.22;
+                    case "premium_cab" -> 1.35;
                     default -> 1.25;
                 };
             } else if (afternoonLow) {
                 baseSurge = switch (vehicleType) {
-                    case "bike" -> 0.95;
+                    case "bike" -> 0.85;
                     case "auto" -> 1.0;
                     case "cab" -> 1.05;
                     case "premium_cab" -> 1.10;
@@ -133,19 +155,19 @@ public class UberMockClient implements ProviderClient {
             } else {
                 // night / early morning
                 baseSurge = switch (vehicleType) {
-                    case "bike" -> 1.0;
-                    case "auto" -> 1.05;
-                    case "cab" -> 1.10;
+                    case "bike" -> 1.08;
+                    case "auto" -> 1.12;
+                    case "cab" -> 1.18;
                     case "premium_cab" -> 1.20;
                     default -> 1.05;
                 };
             }
 
             // slight randomness to avoid static pricing
-            return baseSurge + random(-0.05, 0.05);
+            return baseSurge + random(-0.01, 0.04);
 
         } catch (Exception e) {
-            return random(0.95, 1.15);
+            return random(0.95, 1.05);
         }
     }
 
