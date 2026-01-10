@@ -31,12 +31,13 @@ public class EmissionCalculationService {
         }
 
         // traffic proxy via surge
-        double trafficMultiplier = 1 + ((surgeFactor - 1) * 0.6);
+        // double trafficMultiplier = 1 + ((surgeFactor - 1) * 0.6);
 
-        return round(distanceKm * base * trafficMultiplier);
+        return round(distanceKm * base);
     }
 
     private double round(double v) {
         return Math.round(v * 100.0) / 100.0;
     }
 }
+
